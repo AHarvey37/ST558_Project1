@@ -1,0 +1,8 @@
+#Tentative Division of work
+
+1. Data Processing (Andrew)
+
+2. Writing a Generic Function for Summarizing (Nishad)
+
+3. Put it to (both)
+
