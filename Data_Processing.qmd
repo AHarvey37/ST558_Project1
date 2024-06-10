@@ -89,6 +89,7 @@ county_df<- county_df|>
 
 create division in non-county data set
 ```{r STEP 6}
+#create division vectors
 division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island","Vermont"))
 division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
 division3 <- toupper(c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin"))
@@ -98,7 +99,7 @@ division6 <- toupper(c("Alabama", "Kentucky", "Mississippi", "Tennessee"))
 division7 <- toupper(c("Arkansas", "Louisiana", "Oklahoma",   "Texas"))
 division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
 division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
-#division10 <- c("GU", "PR", "US")
+#add Division variable to noncounty data set
 nonCounty_df<- nonCounty_df|>
   mutate("division" = if_else(area_name %in% division1,
                               "DIVISION 1",
