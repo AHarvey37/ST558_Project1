@@ -1,0 +1,53 @@
+---
+title: "Data Processing Step"
+format: html
+editor: visual
+author: "Andrew Harvey"
+---
+
+# Data processing tests
+
+```{r First Step}
+#read in tidyverse 
+library(tidyverse)
+#create tibble from data on website
+raw_DF <- as_tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
+```
+
+Review data and change names
+```{r data cleaning 1}
+cleaned_DF<- raw_DF|>
+  #rename column
+  rename("area_name" = "Area_name")|>
+  #select only instructed columns
+  select(area_name, STCOU, ends_with("D"))
+```
+
+create long table
+```{r}
+new_df <- pivot_longer(cleaned_DF, 
+                       names_to = "Info",
+                       cols = ends_with("D"),)
+```
+
+separate info col
+```{r}
+#add year variable
+new_df<- new_df|>
+  mutate(year = as.numeric(substr(new_df$Info,8,9)))
+
+#change to full year 
+for (i in 1:nrow(new_df)) {
+  if_else(new_df$year[i]=="87",new_df$year[i]<-1987,
+          if_else(new_df$year[i]=="88",new_df$year[i]<-1988,
+                  if_else(new_df$year[i]=="89",new_df$year[i]<-1989,
+                          if_else(new_df$year[i]=="90",new_df$year[i]<-1990,
+                                  if_else(new_df$year[i]=="91",new_df$year[i]<-1991,
+                                          if_else(new_df$year[i]=="92",new_df$year[i]<-1992,
+                                                  if_else(new_df$year[i]=="93",new_df$year[i]<-1993,
+                                                          if_else(new_df$year[i]=="94",new_df$year[i]<-1994,
+                                                                  if_else(new_df$year[i]=="95",new_df$year[i]<-1995,
+                                                                          new_df$year[i]<-1996)))))))))
+  new_df$Info[i]<-substr(new_df$Info[i],1,7)
+}
+```
