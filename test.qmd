@@ -15,6 +15,7 @@ raw_DF <- as_tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a
 ```
 
 Review data and change names
+
 ```{r data cleaning 1}
 cleaned_DF<- raw_DF|>
   #rename column
@@ -24,6 +25,7 @@ cleaned_DF<- raw_DF|>
 ```
 
 create long table
+
 ```{r}
 new_df <- pivot_longer(cleaned_DF, 
                        names_to = "Info",
@@ -31,23 +33,125 @@ new_df <- pivot_longer(cleaned_DF,
 ```
 
 separate info col
-```{r}
-#add year variable
-new_df<- new_df|>
-  mutate(year = as.numeric(substr(new_df$Info,8,9)))
 
-#change to full year 
-for (i in 1:nrow(new_df)) {
-  if_else(new_df$year[i]=="87",new_df$year[i]<-1987,
-          if_else(new_df$year[i]=="88",new_df$year[i]<-1988,
-                  if_else(new_df$year[i]=="89",new_df$year[i]<-1989,
-                          if_else(new_df$year[i]=="90",new_df$year[i]<-1990,
-                                  if_else(new_df$year[i]=="91",new_df$year[i]<-1991,
-                                          if_else(new_df$year[i]=="92",new_df$year[i]<-1992,
-                                                  if_else(new_df$year[i]=="93",new_df$year[i]<-1993,
-                                                          if_else(new_df$year[i]=="94",new_df$year[i]<-1994,
-                                                                  if_else(new_df$year[i]=="95",new_df$year[i]<-1995,
-                                                                          new_df$year[i]<-1996)))))))))
-  new_df$Info[i]<-substr(new_df$Info[i],1,7)
+```{r}
+# Add year variable and change to full year
+new_df <- new_df %>%
+  mutate(
+    year = as.numeric(substr(Info, 8, 9)),
+    year = case_when(
+      year == 87 ~ 1987,
+      year == 88 ~ 1988,
+      year == 89 ~ 1989,
+      year == 90 ~ 1990,
+      year == 91 ~ 1991,
+      year == 92 ~ 1992,
+      year == 93 ~ 1993,
+      year == 94 ~ 1994,
+      year == 95 ~ 1995,
+      year == 96 ~ 1996,
+      TRUE ~ NA_real_
+    ),
+    Info = substr(Info, 1, 7)
+  )
+
+```
+
+plot.state function
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+plot.state <- function(df, var_name = "enrollment") {
+  df <- df %>%
+    filter(division != "ERROR") %>%
+    group_by(year, division) %>%
+    summarize(mean_value = mean({{ var_name }}, na.rm = TRUE), .groups = 'drop')
+  
+  ggplot(df, aes(x = year, y = mean_value, color = division)) +
+    geom_line() +
+    labs(title = "Mean Enrollment by Division Over Time",
+         x = "Year",
+         y = "Mean Enrollment")
 }
+
+```
+
+plot.county function
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = "enrollment") {
+  if (!is.null(state)) {
+    df <- df %>% filter(state == state)
+  }
+  
+  summary_df <- df %>%
+    group_by(area_name) %>%
+    summarize(mean_value = mean({{ var_name }}, na.rm = TRUE), .groups = 'drop') %>%
+    arrange(if (group == "top") desc(mean_value) else mean_value) %>%
+    slice_head(n = number)
+  
+  plot_df <- df %>% filter(area_name %in% summary_df$area_name)
+  
+  ggplot(plot_df, aes(x = year, y = {{ var_name }}, color = area_name)) +
+    geom_line() +
+    labs(title = paste("Top/Bottom", number, "Counties in", state),
+         x = "Year",
+         y = var_name)
+}
+
+```
+
+testing the functions
+
+```{r}
+# Assuming `non_county_df` and `county_df` are the cleaned and processed data frames
+
+# Add division information to the non-county data (for testing purposes)
+non_county_df <- non_county_df %>%
+  mutate(division = ifelse(grepl("County", area_name), "ERROR", "DivisionName"))
+
+# Plot state data
+plot.state(non_county_df, var_name = "enrollment")
+
+# Add state information to the county data (for testing purposes)
+county_df <- county_df %>%
+  mutate(state = substr(area_name, nchar(area_name) - 1, nchar(area_name)))
+
+# Plot county data
+plot.county(county_df, state = "NC", group = "top", number = 10, var_name = "enrollment")
+
+```
+
+example of using the functions
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(ggplot2)
+
+# Example data processing (assuming your data is already processed into `non_county_df` and `county_df`)
+non_county_df <- data.frame(
+  year = rep(1987:1996, each = 3),
+  division = rep(c("Division1", "Division2", "Division3"), times = 10),
+  enrollment = runif(30, 50, 200)
+)
+
+county_df <- data.frame(
+  year = rep(1987:1996, each = 3),
+  area_name = rep(c("County1", "County2", "County3"), times = 10),
+  state = rep(c("NC", "NC", "SC"), times = 10),
+  enrollment = runif(30, 50, 200)
+)
+
+# Plot state data
+plot.state(non_county_df, var_name = "enrollment")
+
+# Plot county data
+plot.county(county_df, state = "NC", group = "top", number = 2, var_name = "enrollment")
+
 ```

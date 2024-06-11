@@ -1,0 +1,145 @@
+---
+title: "Data Processing Step"
+format: html
+editor: visual
+author: "Andrew Harvey & Nishad Waghare"
+---
+
+# Data processing tests
+
+```{r First Step}
+# Read in tidyverse
+library(tidyverse)
+# Create tibble from data on website
+raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
+```
+
+Review Data and change names
+
+```{r Step 2}
+cleaned_DF <- raw_DF %>%
+  rename(area_name = Area_name) %>%
+  select(area_name, STCOU, ends_with("D"))
+
+```
+Create long table
+
+```{r Step 3}
+new_df <- pivot_longer(cleaned_DF, 
+                       names_to = "Info",
+                       cols = ends_with("D"),
+                       values_to = "enrollment")
+```
+
+Separate info column
+
+```{r Step 4}
+# Add year variable
+new_df <- new_df %>%
+  mutate(
+    year = as.numeric(substr(Info, 8, 9)),
+    year = if_else(year > 24, as.numeric(paste0("19", year)), as.numeric(paste0("20", year))),
+    Info = substr(Info, 1, 7)
+  )
+```
+
+Divide into 2 datasets
+
+```{r Step 5}
+# Find indices of observations that belong in county data set
+x <- grep(pattern = ", \\w\\w", new_df$area_name)
+# Create county data set
+county_df <- new_df[x, ]
+# Create non-county dataset
+nonCounty_df <- new_df[-x, ]
+# Check if county dataset and non-county dataset combine have same number of rows as new_df
+nrow(county_df) + nrow(nonCounty_df) == nrow(new_df)
+# Add class to datasets
+class(county_df) <- c("county", class(county_df))
+class(nonCounty_df) <- c("non-county", class(nonCounty_df))
+```
+
+Create states in county dataset
+
+```{r Step 6}
+# Add State variable to county data set
+county_df <- county_df %>%
+  mutate(state = substr(area_name, nchar(area_name) - 1, nchar(area_name))) %>%
+  select(area_name, state, STCOU, Info, year, enrollment)
+```
+
+Create division in non county datasets
+
+```{r Step 7}
+# Create division vectors
+division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont"))
+division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
+division3 <- toupper(c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin"))
+division4 <- toupper(c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota"))
+division5 <- toupper(c("Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "DISTRICT OF COLUMBIA", "West Virginia"))
+division6 <- toupper(c("Alabama", "Kentucky", "Mississippi", "Tennessee"))
+division7 <- toupper(c("Arkansas", "Louisiana", "Oklahoma", "Texas"))
+division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
+division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
+
+# Add Division variable to non-county data set
+nonCounty_df <- nonCounty_df %>%
+  mutate(division = if_else(area_name %in% division1, "DIVISION 1",
+                            if_else(area_name %in% division2, "DIVISION 2",
+                                    if_else(area_name %in% division3, "DIVISION 3",
+                                            if_else(area_name %in% division4, "DIVISION 4",
+                                                    if_else(area_name %in% division5, "DIVISION 5",
+                                                            if_else(area_name %in% division6, "DIVISION 6",
+                                                                    if_else(area_name %in% division7, "DIVISION 7",
+                                                                            if_else(area_name %in% division8, "DIVISION 8",
+                                                                                    if_else(area_name %in% division9, "DIVISION 9", "ERROR"))))))))))
+
+
+```
+# Generic Function for Summarizing
+
+plot.state function
+
+```{r Step 8}
+plot.state <- function(df, var_name = "enrollment") {
+  df <- df %>%
+    filter(division != "ERROR") %>%
+    group_by(year, division) %>%
+    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop')
+  
+  ggplot(df, aes(x = year, y = mean_value, color = division)) +
+    geom_line() +
+    labs(title = "Mean Enrollment by Division Over Time",
+         x = "Year",
+         y = "Mean Enrollment")
+}
+
+
+```
+
+plot.county function
+
+```{r Step 9}
+plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = "enrollment") {
+  if (!is.null(state)) {
+    df <- df %>% filter(state == state)
+  }
+  
+  summary_df <- df %>%
+    group_by(area_name) %>%
+    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop') %>%
+    arrange(if (group == "top") desc(mean_value) else mean_value) %>%
+    slice_head(n = number)
+  
+  plot_df <- df %>% filter(area_name %in% summary_df$area_name)
+  
+  ggplot(plot_df, aes(x = year, y = .data[[var_name]], color = area_name)) +
+    geom_line() +
+    labs(title = paste("Top/Bottom", number, "Counties in", state),
+         x = "Year",
+         y = var_name)
+}
+
+```
+
+
