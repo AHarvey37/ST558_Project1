@@ -37,24 +37,26 @@ separate info col
 ```{r STEP 3}
 #add year variable
 new_df<- new_df|>
-  mutate(year = as.numeric(substr(new_df$Info,8,9)))
+  mutate(year = as.numeric(substr(Info,8,9)))|>
+  #use when() statement to create 4 digit year
+  mutate(year = when(year>24,~as.numeric(paste0("19",year))))
 
-  #change to full year 
-  for (i in 1:nrow(new_df)) {
-    #use if greater than 24 as condition as 2024 is our current year
-    if(new_df$year[i] > 24){
-      #if true add 19 to observation, change to numeric and store 4 digits as year
-      new_df$year[i] <- as.numeric(paste0("19",new_df$year[i]))
-      }
-    else{
-      #if true add 20 to observation, change to numeric and store 4 digits as year
-      new_df$year[i] <- as.numeric(paste0("20",new_df$year[i]))
-      }
-  }
+  # #change to full year 
+  # for (i in 1:nrow(new_df)) {
+  #   #use if greater than 24 as condition as 2024 is our current year
+  #   if(new_df$year[i] > 24){
+  #     #if true add 19 to observation, change to numeric and store 4 digits as year
+  #     new_df$year[i] <- as.numeric(paste0("19",new_df$year[i]))
+  #     }
+  #   else{
+  #     #if true add 20 to observation, change to numeric and store 4 digits as year
+  #     new_df$year[i] <- as.numeric(paste0("20",new_df$year[i]))
+  #     }
+  # }
 
 new_df<-new_df|>
   #change info to equal the 7 character educational code
-  mutate(Info = substr(new_df$Info,1,7))|>
+  mutate(Info = substr(Info,1,7))|>
   #arrange Variables for better visual
   select(area_name, STCOU, Info, year, value)
 
@@ -143,26 +145,18 @@ rename_and_select <- function(raw_df){
 function2
 ```{r function 2}
 create_longer_w_year<-function(pass_df){
+  #create new tibble
   passed_df <- pivot_longer(pass_df,
                             names_to = "Info",
                             cols = ends_with("D"))
+  #add year to tibble
   passed_df<- passed_df|>
-    mutate(year = as.numeric(substr(passed_df$Info,8,9)))
-  
-  for (i in nrow(passed_df)) {
-    #use if greater than 24 as condition as 2024 is our current year
-    if(passed_df$year[i] > 24){
-      #if true add 19 to observation, change to numeric and store 4 digits as year
-      passed_df$year[i] <- as.numeric(paste0("19",passed_df$year[i]))
-      }
-    else{
-      #if true add 20 to observation, change to numeric and store 4 digits as year
-      passed_df$year[i] <- as.numeric(paste0("20",passed_df$year[i]))
-      }
-  }
+    mutate(year = as.numeric(substr(Info,8,9)))|>
+    #change 2 digit year to 4 digit year
+    mutate(year = if_else(year>24, as.numeric(paste0("19",year)),as.numeric(paste0("200",year))))
   passed_df<-passed_df|>
   #change info to equal the 7 character educational code
-  mutate(Info = substr(passed_df$Info,1,7))|>
+  mutate(Info = substr(Info,1,7))|>
   #arrange Variables for better visual
   select(area_name, STCOU, Info, year, value)
   return(passed_df)
@@ -197,27 +191,29 @@ create_division_var<- function(nonCounty_df){
   division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
   division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
   #add Division variable to noncounty data set
-  nonCounty_df<- nonCounty_df|>
-    mutate("division" = if_else(area_name %in% division1,
-                                "DIVISION 1",
-                                if_else(area_name %in% division2,
-                                        "DIVISION 2",
-                                        if_else(area_name %in% division3,
-                                                "DIVISION 3",
-                                                if_else(area_name %in% division4,
-                                                        "DIVISION 4",
-                                                        if_else(area_name %in% division5,
-                                                                "DIVISION 5",
-                                                                if_else(area_name %in% division6,
-                                                                        "DIVISION 6",
-                                                                        if_else(area_name %in% division7,
-                                                                                "DIVISION 7",
-                                                                                if_else(area_name %in% division8,
-                                                                                        "DIVISION 8",
-                                                                                        if_else(area_name %in% division9,
-                                                                                                "DIVISION 9",
-                                                                                                "ERROR"))))))))))
-  return(nonCounty_df)
+  nonCounty_df2<- nonCounty_df|>
+    mutate(division = "test")|>
+    mutate(division = if_else(area_name %in% division1,
+                                "DIVISION 1", "didnt work"
+                                # if_else(area_name %in% division2,
+                                #         "DIVISION 2",
+                                #         if_else(area_name %in% division3,
+                                #                 "DIVISION 3",
+                                #                 if_else(area_name %in% division4,
+                                #                         "DIVISION 4",
+                                #                         if_else(area_name %in% division5,
+                                #                                 "DIVISION 5",
+                                #                                 if_else(area_name %in% division6,
+                                #                                         "DIVISION 6",
+                                #                                         if_else(area_name %in% division7,
+                                #                                                 "DIVISION 7",
+                                #                                                 if_else(area_name %in% division8,
+                                #                                                         "DIVISION 8",
+                                #                                                         if_else(area_name %in% division9,
+                                #                                                                 "DIVISION 9",
+                                #                                                                 "ERROR"))))))))))
+    ))
+  return(nonCounty_df2)
   }
 ```
 
@@ -244,7 +240,7 @@ split_tibbles<- function(pass_df){
 ```
 
 put it together
-```{r wrapepr}
+```{r wrapper}
 my_wrapper <- function(url, pass_df = as.tibble(c(1:5))){
   pass_df<-read.csv(url)|>
     rename_and_select()|>
@@ -256,7 +252,11 @@ my_wrapper <- function(url, pass_df = as.tibble(c(1:5))){
 
 test wrapper
 ```{r test wrapper}
-
+test<-read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+test<-rename_and_select(test)
+test<-create_longer_w_year(test)
+test<-split_tibbles(test)
+test[1]
 my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
