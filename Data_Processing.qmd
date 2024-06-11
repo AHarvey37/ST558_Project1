@@ -39,22 +39,24 @@ separate info col
 new_df<- new_df|>
   mutate(year = as.numeric(substr(new_df$Info,8,9)))
 
-#change to full year 
-for (i in 1:nrow(new_df)) {
-  if_else(new_df$year[i]=="87",new_df$year[i]<-1987,
-          if_else(new_df$year[i]=="88",new_df$year[i]<-1988,
-                  if_else(new_df$year[i]=="89",new_df$year[i]<-1989,
-                          if_else(new_df$year[i]=="90",new_df$year[i]<-1990,
-                                  if_else(new_df$year[i]=="91",new_df$year[i]<-1991,
-                                          if_else(new_df$year[i]=="92",new_df$year[i]<-1992,
-                                                  if_else(new_df$year[i]=="93",new_df$year[i]<-1993,
-                                                          if_else(new_df$year[i]=="94",new_df$year[i]<-1994,
-                                                                  if_else(new_df$year[i]=="95",new_df$year[i]<-1995,
-                                                                          new_df$year[i]<-1996)))))))))
-  new_df$Info[i]<-substr(new_df$Info[i],1,7)
-}
-#arrange Variables for better visual
-select(new_df,area_name, STCOU, Info, year, value)
+  #change to full year 
+  for (i in 1:nrow(new_df)) {
+    #use if greater than 24 as condition as 2024 is our current year
+    if(new_df$year[i] > 24){
+      #if true add 19 to observation, change to numeric and store 4 digits as year
+      new_df$year[i] <- as.numeric(paste0("19",new_df$year[i]))
+      }
+    else{
+      #if true add 20 to observation, change to numeric and store 4 digits as year
+      new_df$year[i] <- as.numeric(paste0("20",new_df$year[i]))
+      }
+  }
+
+new_df<-new_df|>
+  #change info to equal the 7 character educational code
+  mutate(Info = substr(new_df$Info,1,7))|>
+  #arrange Variables for better visual
+  select(area_name, STCOU, Info, year, value)
 
 ```
 
@@ -121,4 +123,5 @@ nonCounty_df<- nonCounty_df|>
                                                                                               "DIVISION 9",
                                                                                               "ERROR"))))))))))
 ```
+
 
