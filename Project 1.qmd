@@ -1,0 +1,175 @@
+---
+title: "ST 558 Project 1"
+format: html
+editor: visual
+author: "Andrew Harvey & Nishad Waghare"
+---
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(ggplot2)
+```
+
+Data Processing Functions
+
+```{r}
+# Wrapper function for data processing
+process_data <- function(url) {
+  # Read in the data
+  raw_DF <- as.tibble(read.csv(url))
+  
+  # Clean and select columns
+  cleaned_DF <- raw_DF %>%
+    rename(area_name = Area_name) %>%
+    select(area_name, STCOU, ends_with("D"))
+  
+  # Pivot longer
+  new_df <- pivot_longer(cleaned_DF, 
+                         names_to = "Info",
+                         cols = ends_with("D"),
+                         values_to = "enrollment")
+  
+  # Add year and measurement
+  new_df <- new_df %>%
+    mutate(
+      year = as.numeric(substr(Info, 8, 9)),
+      year = if_else(year > 24, as.numeric(paste0("19", year)), as.numeric(paste0("20", year))),
+      Info = substr(Info, 1, 7)
+    )
+  
+  # Split into county and non-county datasets
+  x <- grep(pattern = ", \\w\\w", new_df$area_name)
+  county_df <- new_df[x, ]
+  nonCounty_df <- new_df[-x, ]
+  class(county_df) <- c("county", class(county_df))
+  class(nonCounty_df) <- c("non-county", class(nonCounty_df))
+  
+  # Add state information to county dataset
+  county_df <- county_df %>%
+    mutate(state = substr(area_name, nchar(area_name) - 1, nchar(area_name))) %>%
+    select(area_name, state, STCOU, Info, year, enrollment)
+  
+  # Add division information to non-county dataset
+  division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont"))
+  division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
+  division3 <- toupper(c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin"))
+  division4 <- toupper(c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota"))
+  division5 <- toupper(c("Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "DISTRICT OF COLUMBIA", "West Virginia"))
+  division6 <- toupper(c("Alabama", "Kentucky", "Mississippi", "Tennessee"))
+  division7 <- toupper(c("Arkansas", "Louisiana", "Oklahoma", "Texas"))
+  division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
+  division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
+  
+  nonCounty_df <- nonCounty_df %>%
+    mutate(division = if_else(area_name %in% division1, "DIVISION 1",
+                              if_else(area_name %in% division2, "DIVISION 2",
+                                      if_else(area_name %in% division3, "DIVISION 3",
+                                              if_else(area_name %in% division4, "DIVISION 4",
+                                                      if_else(area_name %in% division5, "DIVISION 5",
+                                                              if_else(area_name %in% division6, "DIVISION 6",
+                                                                      if_else(area_name %in% division7, "DIVISION 7",
+                                                                              if_else(area_name %in% division8, "DIVISION 8",
+                                                                                      if_else(area_name %in% division9, "DIVISION 9", "ERROR"))))))))))
+  
+  list(county = county_df, non_county = nonCounty_df)
+}
+
+# Combine data function
+combine_data <- function(data_list) {
+  combined_county <- bind_rows(lapply(data_list, `[[`, "county"))
+  combined_non_county <- bind_rows(lapply(data_list, `[[`, "non_county"))
+  list(county = combined_county, non_county = combined_non_county)
+}
+```
+
+Plotting Functions
+
+```{r}
+# Plot state function
+plot.state <- function(df, var_name = "enrollment") {
+  df <- df %>%
+    filter(division != "ERROR") %>%
+    group_by(year, division) %>%
+    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop')
+  
+  ggplot(df, aes(x = year, y = mean_value, color = division)) +
+    geom_line() +
+    labs(title = "Mean Enrollment by Division Over Time",
+         x = "Year",
+         y = "Mean Enrollment")
+}
+
+# Plot county function
+plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = "enrollment") {
+  if (!is.null(state)) {
+    df <- df %>% filter(state == state)
+  }
+  
+  summary_df <- df %>%
+    group_by(area_name) %>%
+    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop') %>%
+    arrange(if (group == "top") desc(mean_value) else mean_value) %>%
+    slice_head(n = number)
+  
+  plot_df <- df %>% filter(area_name %in% summary_df$area_name)
+  
+  ggplot(plot_df, aes(x = year, y = .data[[var_name]], color = area_name)) +
+    geom_line() +
+    labs(title = paste("Top/Bottom", number, "Counties in", state),
+         x = "Year",
+         y = var_name)
+}
+
+```
+
+Putting it Together
+
+```{r}
+# URLs of datasets
+urls <- c(
+  "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",
+  "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"
+)
+
+# Process data
+data_list <- lapply(urls, process_data)
+
+# Combine data
+combined_data <- combine_data(data_list)
+
+# Plot state data
+plot.state(combined_data$non_county, var_name = "enrollment")
+
+# Plot county data with different parameters
+plot.county(combined_data$county, state = "NC", group = "top", number = 20, var_name = "enrollment")
+plot.county(combined_data$county, state = "SC", group = "bottom", number = 7, var_name = "enrollment")
+plot.county(combined_data$county, var_name = "enrollment")  # Default parameters
+plot.county(combined_data$county, state = "PA", group = "top", number = 8, var_name = "enrollment")
+
+# Additional URLs for further processing
+additional_urls <- c(
+  "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv",
+  "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv",
+  "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv",
+  "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv"
+)
+
+# Process additional data
+additional_data_list <- lapply(additional_urls, process_data)
+
+# Combine additional data
+combined_additional_data <- combine_data(additional_data_list)
+
+# Plot additional state data
+plot.state(combined_additional_data$non_county, var_name = "enrollment")
+
+# Plot additional county data with different parameters
+plot.county(combined_additional_data$county, state = "CA", group = "top", number = 15, var_name = "enrollment")
+plot.county(combined_additional_data$county, state = "TX", group = "top", number = 4, var_name = "enrollment")
+plot.county(combined_additional_data$county, var_name = "enrollment")  # Default parameters
+plot.county(combined_additional_data$county, state = "NY", group = "top", number = 10, var_name = "enrollment")
+
+```
+
+
