@@ -29,7 +29,7 @@ create long table
 ```{r STEP 2}
 new_df <- pivot_longer(cleaned_DF, 
                        names_to = "Info",
-                       cols = ends_with("D"),)
+                       cols = ends_with("D"))
 ```
 
 separate info col
@@ -124,4 +124,150 @@ nonCounty_df<- nonCounty_df|>
                                                                                               "ERROR"))))))))))
 ```
 
+
+second component 
+
+function1
+```{r function 1}
+rename_and_select <- function(raw_df){
+  pass_df<-raw_df|>
+    #rename column
+    rename("area_name" = "Area_name")|>
+    #select only instructed columns
+    select(area_name, STCOU, ends_with("D"))
+  return(pass_df)
+}
+```
+
+
+function2
+```{r function 2}
+create_longer_w_year<-function(pass_df){
+  passed_df <- pivot_longer(pass_df,
+                            names_to = "Info",
+                            cols = ends_with("D"))
+  passed_df<- passed_df|>
+    mutate(year = as.numeric(substr(passed_df$Info,8,9)))
+  
+  for (i in nrow(passed_df)) {
+    #use if greater than 24 as condition as 2024 is our current year
+    if(passed_df$year[i] > 24){
+      #if true add 19 to observation, change to numeric and store 4 digits as year
+      passed_df$year[i] <- as.numeric(paste0("19",passed_df$year[i]))
+      }
+    else{
+      #if true add 20 to observation, change to numeric and store 4 digits as year
+      passed_df$year[i] <- as.numeric(paste0("20",passed_df$year[i]))
+      }
+  }
+  passed_df<-passed_df|>
+  #change info to equal the 7 character educational code
+  mutate(Info = substr(passed_df$Info,1,7))|>
+  #arrange Variables for better visual
+  select(area_name, STCOU, Info, year, value)
+  return(passed_df)
+  }
+```
+
+
+function 3
+```{r function 3}
+create_state_var<- function(county_df){
+  #add State variable to county data set
+  county_df<- county_df|>
+  #adds state variable using substr. substr takes area_name as the vector, uses nchar to count number of characters in area_name and subtracts 2 to find where to start, uses nchar to find last char position
+    mutate("state" = substr(area_name, nchar(area_name)-2, nchar(area_name)))|>
+    #rearrange variables
+    select(area_name, state, STCOU, Info, year, value)
+  return(county_df)
+  }
+```
+
+function 4
+```{r function 4}
+create_division_var<- function(nonCounty_df){
+  #create division vectors
+  division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island","Vermont"))
+  division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
+  division3 <- toupper(c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin"))
+  division4 <- toupper(c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota"))
+  division5 <- toupper(c("Delaware", "Florida", "Georgia", "Maryland" , "North Carolina", "South Carolina", "Virginia", "DISTRICT OF COLUMBIA", "West Virginia"))
+  division6 <- toupper(c("Alabama", "Kentucky", "Mississippi", "Tennessee"))
+  division7 <- toupper(c("Arkansas", "Louisiana", "Oklahoma",   "Texas"))
+  division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
+  division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
+  #add Division variable to noncounty data set
+  nonCounty_df<- nonCounty_df|>
+    mutate("division" = if_else(area_name %in% division1,
+                                "DIVISION 1",
+                                if_else(area_name %in% division2,
+                                        "DIVISION 2",
+                                        if_else(area_name %in% division3,
+                                                "DIVISION 3",
+                                                if_else(area_name %in% division4,
+                                                        "DIVISION 4",
+                                                        if_else(area_name %in% division5,
+                                                                "DIVISION 5",
+                                                                if_else(area_name %in% division6,
+                                                                        "DIVISION 6",
+                                                                        if_else(area_name %in% division7,
+                                                                                "DIVISION 7",
+                                                                                if_else(area_name %in% division8,
+                                                                                        "DIVISION 8",
+                                                                                        if_else(area_name %in% division9,
+                                                                                                "DIVISION 9",
+                                                                                                "ERROR"))))))))))
+  return(nonCounty_df)
+  }
+```
+
+function 6
+```{r function 6}
+split_tibbles<- function(pass_df){
+  #find indices of observations that belong in county data set
+  x<-grep(pattern = ", \\w\\w",pass_df$area_name)
+  #create county data set
+  county_df<- pass_df[x,]
+  create_state_var(county_df)
+  #create non-county dataset
+  nonCounty_df<- pass_df[-x,]
+  create_division_var(nonCounty_df)
+  #check if county dataset and noncounty dataset combine have same number of rows as new_df
+  #i.e. check if any rows were lost
+  nrow(county_df)+nrow(nonCounty_df) == nrow(pass_df)
+  #add class to datasets
+  class(county_df)<- c("county", class(county_df))
+  class(nonCounty_df)<- c("non-county", class(nonCounty_df))
+  #return data sets
+  return(list(county_df, nonCounty_df))
+}
+```
+
+put it together
+```{r wrapepr}
+my_wrapper <- function(url, pass_df = as.tibble(c(1:5))){
+  pass_df<-read.csv(url)|>
+    rename_and_select()|>
+    create_longer_w_year()|>
+    split_tibbles()
+  return(pass_df)
+}
+```
+
+test wrapper
+```{r test wrapper}
+
+my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+```
+
+parse two data sets
+```{r parse}
+list1<-my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
+list2<-my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+
+print(list1[[1]])
+print(list1[[2]])
+print(list2[[1]])
+print(list2[[2]])
+```
 
