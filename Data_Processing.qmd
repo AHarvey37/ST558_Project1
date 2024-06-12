@@ -11,12 +11,12 @@ author: "Andrew Harvey & Nishad Waghare"
 #read in tidyverse 
 library(tidyverse)
 #create tibble from data on website
-raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
+#raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
 ```
 
 Review data and change names
 
-```{r STEP 1}
+```{r STEP 1, include=FALSE}
 cleaned_DF<- raw_DF|>
   #rename column
   rename("area_name" = "Area_name")|>
@@ -26,7 +26,7 @@ cleaned_DF<- raw_DF|>
 
 create long table
 
-```{r STEP 2}
+```{r STEP 2,include=FALSE}
 new_df <- pivot_longer(cleaned_DF, 
                        names_to = "Info",
                        cols = ends_with("D"))
@@ -34,7 +34,7 @@ new_df <- pivot_longer(cleaned_DF,
 
 separate info col
 
-```{r STEP 3}
+```{r STEP 3,include=FALSE}
 #add year variable
 new_df<- new_df|>
   mutate(year = as.numeric(substr(Info,8,9)))|>
@@ -63,7 +63,7 @@ new_df<-new_df|>
 ```
 
 Divide into 2 datasets
-```{r STEP 4}
+```{r STEP 4,include=FALSE}
 #find indices of observations that belong in county data set
 x<-grep(pattern = ", \\w\\w",new_df$area_name)
 #create county data set
@@ -82,7 +82,7 @@ class(nonCounty_df)
 ```
 
 Create states in county data set
-```{r STEP 5}
+```{r STEP 5,include=FALSE}
 #add State variable to county data set
 county_df<- county_df|>
   #adds state variable using substr. substr takes area_name as the vector, uses nchar to count number of characters in area_name and subtracts 2 to find where to start, uses nchar to find last char position
@@ -92,7 +92,7 @@ county_df<- county_df|>
 ```
 
 create division in non-county data set
-```{r STEP 6}
+```{r STEP 6,include=FALSE}
 #create division vectors
 division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island","Vermont"))
 division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
@@ -192,27 +192,26 @@ create_division_var<- function(nonCounty_df){
   division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
   #add Division variable to noncounty data set
   nonCounty_df2<- nonCounty_df|>
-    mutate(division = "test")|>
-    mutate(division = if_else(area_name %in% division1,
-                                "DIVISION 1", "didnt work"
-                                # if_else(area_name %in% division2,
-                                #         "DIVISION 2",
-                                #         if_else(area_name %in% division3,
-                                #                 "DIVISION 3",
-                                #                 if_else(area_name %in% division4,
-                                #                         "DIVISION 4",
-                                #                         if_else(area_name %in% division5,
-                                #                                 "DIVISION 5",
-                                #                                 if_else(area_name %in% division6,
-                                #                                         "DIVISION 6",
-                                #                                         if_else(area_name %in% division7,
-                                #                                                 "DIVISION 7",
-                                #                                                 if_else(area_name %in% division8,
-                                #                                                         "DIVISION 8",
-                                #                                                         if_else(area_name %in% division9,
-                                #                                                                 "DIVISION 9",
-                                #                                                                 "ERROR"))))))))))
-    ))
+    # mutate(division = 0)|>
+    mutate(division = ifelse(area_name %in% division1,
+                                "1",
+                                if_else(area_name %in% division2,
+                                        "2",
+                                        if_else(area_name %in% division3,
+                                                "3",
+                                                if_else(area_name %in% division4,
+                                                        "4",
+                                                        if_else(area_name %in% division5,
+                                                                "5",
+                                                                if_else(area_name %in% division6,
+                                                                        "6",
+                                                                        if_else(area_name %in% division7,
+                                                                                "7",
+                                                                                if_else(area_name %in% division8,
+                                                                                        "8",
+                                                                                        if_else(area_name %in% division9,
+                                                                                                "9",
+                                                                                                "ERROR"))))))))))
   return(nonCounty_df2)
   }
 ```
@@ -223,14 +222,11 @@ split_tibbles<- function(pass_df){
   #find indices of observations that belong in county data set
   x<-grep(pattern = ", \\w\\w",pass_df$area_name)
   #create county data set
-  county_df<- pass_df[x,]
-  create_state_var(county_df)
+  county_df<- pass_df[x,]|>
+    create_state_var()
   #create non-county dataset
-  nonCounty_df<- pass_df[-x,]
-  create_division_var(nonCounty_df)
-  #check if county dataset and noncounty dataset combine have same number of rows as new_df
-  #i.e. check if any rows were lost
-  nrow(county_df)+nrow(nonCounty_df) == nrow(pass_df)
+  nonCounty_df<- pass_df[-x,]|>
+    create_division_var()
   #add class to datasets
   class(county_df)<- c("county", class(county_df))
   class(nonCounty_df)<- c("non-county", class(nonCounty_df))
@@ -252,11 +248,6 @@ my_wrapper <- function(url, pass_df = as.tibble(c(1:5))){
 
 test wrapper
 ```{r test wrapper}
-test<-read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
-test<-rename_and_select(test)
-test<-create_longer_w_year(test)
-test<-split_tibbles(test)
-test[1]
 my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
