@@ -12,13 +12,13 @@ author: "Andrew Harvey & Nishad Waghare"
 ```{r First Step}
 #read in tidyverse 
 library(tidyverse)
-#create tibble from data on website
-#raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
 ```
 
 Review data and change names
 
 ```{r STEP 1, eval=FALSE}
+#create tibble from data on website
+#raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
 cleaned_DF<- raw_DF|>
   #rename column
   rename("area_name" = "Area_name")|>
