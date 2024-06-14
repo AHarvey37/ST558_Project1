@@ -1,0 +1,133 @@
+---
+title: "Project1_Harvey_Waghare"
+author: "Andrew Harvey & Nishad Waghare"
+date: "14 June 2024"
+format: html
+editor: visual
+---
+
+# Project 1
+
+## Data Processing
+
+The follow code chunk executed steps 1 - 6 in preparation for creating the functions that will be utilized in the data processing. These chunks **do not execute** and are only included to display how the functions worked prior to the function's creation.
+
+```{r First Step}
+#read in tidyverse 
+library(tidyverse)
+```
+
+Review data and change names
+
+```{r STEP 1, eval=FALSE}
+#create tibble from data on website
+#raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
+cleaned_DF<- raw_DF|>
+  #rename column
+  rename("area_name" = "Area_name")|>
+  #select only instructed columns
+  select(area_name, STCOU, ends_with("D"))
+```
+
+create long table
+
+```{r STEP 2,eval=FALSE}
+new_df <- pivot_longer(cleaned_DF, 
+                       names_to = "Info",
+                       cols = ends_with("D"))
+```
+
+separate info col
+
+```{r STEP 3, eval=FALSE}
+#add year variable
+new_df<- new_df|>
+  mutate(year = as.numeric(substr(Info,8,9)))|>
+  #use when() statement to create 4 digit year
+  mutate(year = when(year>24,~as.numeric(paste0("19",year))))
+
+  # #change to full year 
+  # for (i in 1:nrow(new_df)) {
+  #   #use if greater than 24 as condition as 2024 is our current year
+  #   if(new_df$year[i] > 24){
+  #     #if true add 19 to observation, change to numeric and store 4 digits as year
+  #     new_df$year[i] <- as.numeric(paste0("19",new_df$year[i]))
+  #     }
+  #   else{
+  #     #if true add 20 to observation, change to numeric and store 4 digits as year
+  #     new_df$year[i] <- as.numeric(paste0("20",new_df$year[i]))
+  #     }
+  # }
+
+new_df<-new_df|>
+  #change info to equal the 7 character educational code
+  mutate(Info = substr(Info,1,7))|>
+  #arrange Variables for better visual
+  select(area_name, STCOU, Info, year, value)
+
+```
+
+Divide into 2 datasets
+```{r STEP 4, eval=FALSE}
+#find indices of observations that belong in county data set
+x<-grep(pattern = ", \\w\\w",new_df$area_name)
+#create county data set
+county_df<- new_df[x,]
+#create non-county dataset
+nonCounty_df<- new_df[-x,]
+#check if county dataset and noncounty dataset combine have same number of rows as new_df
+#i.e. check if any rows were lost
+nrow(county_df)+nrow(nonCounty_df) == nrow(new_df)
+#add class to datasets
+class(county_df)<- c("county", class(county_df))
+class(nonCounty_df)<- c("non-county", class(nonCounty_df))
+#check
+class(county_df)
+class(nonCounty_df)
+```
+
+Create states in county data set
+```{r STEP 5, eval=FALSE}
+#add State variable to county data set
+county_df<- county_df|>
+  #adds state variable using substr. substr takes area_name as the vector, uses nchar to count number of characters in area_name and subtracts 2 to find where to start, uses nchar to find last char position
+  mutate("state" = substr(area_name, nchar(area_name)-2, nchar(area_name)))|>
+  #rearrange variables
+  select(area_name, state, STCOU, Info, year, value)
+```
+
+create division in non-county data set
+```{r STEP 6, eval=FALSE}
+#create division vectors
+division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island","Vermont"))
+division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
+division3 <- toupper(c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin"))
+division4 <- toupper(c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota"))
+division5 <- toupper(c("Delaware", "Florida", "Georgia", "Maryland" , "North Carolina", "South Carolina", "Virginia", "DISTRICT OF COLUMBIA", "West Virginia"))
+division6 <- toupper(c("Alabama", "Kentucky", "Mississippi", "Tennessee"))
+division7 <- toupper(c("Arkansas", "Louisiana", "Oklahoma",   "Texas"))
+division8 <- toupper(c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming"))
+division9 <- toupper(c("Alaska", "California", "Hawaii", "Oregon", "Washington"))
+#add Division variable to noncounty data set
+nonCounty_df<- nonCounty_df|>
+  mutate("division" = if_else(area_name %in% division1,
+                              "DIVISION 1",
+                              if_else(area_name %in% division2,
+                                      "DIVISION 2",
+                                      if_else(area_name %in% division3,
+                                              "DIVISION 3",
+                                              if_else(area_name %in% division4,
+                                                      "DIVISION 4",
+                                                      if_else(area_name %in% division5,
+                                                              "DIVISION 5",
+                                                              if_else(area_name %in% division6,
+                                                                      "DIVISION 6",
+                                                                      if_else(area_name %in% division7,
+                                                                              "DIVISION 7",
+                                                                              if_else(area_name %in% division8,
+                                                                                      "DIVISION 8",
+                                                                                      if_else(area_name %in% division9,
+                                                                                              "DIVISION 9",
+                                                                                              "ERROR"))))))))))
+```
+
