@@ -309,7 +309,7 @@ plot.state <- function(df, var_name = "enrollment") {
     labs(title = "Mean Enrollment by Division Over Time",
          x = "Year",
          y = "Mean Enrollment")
-}
+} 
 
 # Plot county function
 plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = "enrollment") {
