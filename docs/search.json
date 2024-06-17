@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "Task_list.html",
+    "href": "Task_list.html",
+    "title": "",
+    "section": "",
+    "text": "#Tentative Division of work\n\nData Processing (Andrew)\nWriting a Generic Function for Summarizing (Nishad)\nPut it to (both)"
+  },
+  {
     "objectID": "Project_1_Harvey_Waghare.html",
     "href": "Project_1_Harvey_Waghare.html",
     "title": "Project1_Harvey_Waghare",
@@ -33,12 +40,5 @@
     "title": "Project1_Harvey_Waghare",
     "section": "",
     "text": "# Plot state function\nplot.state &lt;- function(df, var_name = \"enrollment\") {\n  df &lt;- df %&gt;%\n    filter(division != \"ERROR\") %&gt;%\n    group_by(year, division) %&gt;%\n    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop')\n  \n  ggplot(df, aes(x = year, y = mean_value, color = division)) +\n    geom_line() +\n    labs(title = \"Mean Enrollment by Division Over Time\",\n         x = \"Year\",\n         y = \"Mean Enrollment\")\n} \n\n\n# Plot county function\nplot.county &lt;- function(df, state_var = NULL, group = \"top\", number = 5, var_name = \"enrollment\") {\n  if (!is.null(state_var)) {\n    #created a new variable for legibility \n    new_df &lt;- df %&gt;%\n      #this line removes a space that is being added into every observation of the state var\n      mutate(state = substr(state, nchar(state)-1, nchar(state)))%&gt;%\n      filter(state == state_var)\n  }\n  else{\n    new_df&lt;-df\n  }\n  summary_df &lt;- new_df %&gt;%\n    group_by(area_name) %&gt;%\n    summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop') %&gt;%\n    arrange(if (group == \"top\") desc(mean_value) else mean_value) %&gt;%\n    slice_head(n = number)\n  \n  plot_df &lt;- df %&gt;% filter(area_name %in% summary_df$area_name)\n  \n  ggplot(plot_df, aes(x = year, y = .data[[var_name]], color = area_name)) +\n    geom_line() +\n    labs(title = paste(\"Top/Bottom\", number, \"Counties in\", state_var),\n         x = \"Year\",\n         y = var_name)\n}\n\nPutting it Together\n\n# URLs of datasets\n# urls &lt;- c(\n#   \"https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv\",\n#   \"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv\"\n# )\n\n# # Process data\n# data_list &lt;- lapply(urls, process_data)\n# \n# # Combine data\n# combined_data &lt;- combine_data(data_list)\n\n# Plot state data\nplot.state(combined_data$non_county, var_name = \"enrollment\")\n\n\n\n\n\n\n\n# Plot county data with different parameters\nplot.county(combined_data$county, state_var = \"NC\", group = \"top\", number = 20, var_name = \"enrollment\")\n\n\n\n\n\n\n\nplot.county(combined_data$county, state_var = \"SC\", group = \"bottom\", number = 7, var_name = \"enrollment\")\n\n\n\n\n\n\n\nplot.county(combined_data$county, var_name = \"enrollment\")  # Default parameters\n\n\n\n\n\n\n\nplot.county(combined_data$county, state_var = \"PA\", group = \"top\", number = 8, var_name = \"enrollment\")\n\n\n\n\n\n\n\n# Additional URLs for further processing\nadditional_urls &lt;- c(\n  \"https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv\",\n  \"https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv\",\n  \"https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv\",\n  \"https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv\"\n)\n\n# Process additional data\nadditional_data_list &lt;- sapply(additional_urls, my_wrapper)\n\n# Combine additional data\ncombined_additional_data &lt;- combine_data_sets(additional_data_list)\n# Plot additional state data\nplot.state(combined_additional_data$non_county, var_name = \"enrollment\")\n\n\n\n\n\n\n\n# Plot additional county data with different parameters\nplot.county(combined_additional_data$county, state_var = \"CA\", group = \"top\", number = 15, var_name = \"enrollment\")\n\n\n\n\n\n\n\nplot.county(combined_additional_data$county, state_var = \"TX\", group = \"top\", number = 4, var_name = \"enrollment\")\n\n\n\n\n\n\n\nplot.county(combined_additional_data$county, var_name = \"enrollment\")  # Default parameters\n\n\n\n\n\n\n\nplot.county(combined_additional_data$county, state_var = \"NY\", group = \"top\", number = 10, var_name = \"enrollment\")"
-  },
-  {
-    "objectID": "Task_list.html",
-    "href": "Task_list.html",
-    "title": "",
-    "section": "",
-    "text": "#Tentative Division of work\n\nData Processing (Andrew)\nWriting a Generic Function for Summarizing (Nishad)\nPut it to (both)"
   }
 ]

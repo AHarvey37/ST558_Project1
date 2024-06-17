@@ -1,7 +1,7 @@
 ---
 title: "Project1_Harvey_Waghare"
 author: "Andrew Harvey & Nishad Waghare"
-date: "14 June 2024"
+date: "18 June 2024"
 format: html
 editor: visual
 ---
@@ -10,18 +10,20 @@ editor: visual
 
 ## Initial Data Processing Steps
 
-The follow code chunk executed steps 1 - 6 in preparation for creating the functions that will be utilized in the data processing. These chunks **do not execute** and are only included to display how the functions worked prior to the function's creation.
+The follow code chunks were written to execute steps 1 - 6 from the data processing section in preparation for creating the functions that will be utilized in the data processing. These chunks **do not execute** (with the exception of the first) and are only included to display how the functions were developed prior to their actual creation.
 
-```{r First Step}
+This first chunk's purpose is to load all libraries that are used though out the document. The tidyverse is the only library used and thus is the only statement within the chunk. 
+
+```{r Load tidyverse}
 #read in tidyverse 
 library(tidyverse)
 ```
 
-Review data and change names
+This next chunk is the thought process for reviewing data that will be read in and changing names as applicable. First the chunk reads in a comma separated file from the provided website and stores it as a tibble named "raw_DF". Next, the variable "Area_name" was changed, using the rename function, "to area_name". Finally, the variables area_name, STCOU, and all variables that end with "D" are selected and stored in a new tibble. 
 
-```{r STEP 1, eval=FALSE}
+```{r Review data and change names, eval=FALSE}
 #create tibble from data on website
-#raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
+raw_DF <- as.tibble(read.csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"))
 cleaned_DF<- raw_DF|>
   #rename column
   rename("area_name" = "Area_name")|>
@@ -29,24 +31,25 @@ cleaned_DF<- raw_DF|>
   select(area_name, STCOU, ends_with("D"))
 ```
 
-create long table
+The next chunk takes the "cleaned_DF" and changes it from a wide table to a long table using the pivot_longer function. It's output results in every area_name having one observation. 
 
-```{r STEP 2,eval=FALSE}
+```{r Create Long Table,eval=FALSE}
 new_df <- pivot_longer(cleaned_DF, 
                        names_to = "Info",
                        cols = ends_with("D"))
 ```
 
-separate info col
+This chunk takes our new long table tibble and adds a numeric year variable using the mutate and substr functions. Substr looks at the Info variable (which has a fixed length of 10) and pulls out the characters at positions 8 through 9. The as.numeric coerses those characters into numbers which are then assigned to the year variable. The next mutate statement takes that 2 digit year and creates a 4 digit year using the if_else statement. Since our data only includes observations AFTER 1986 the statement compares if the value of year is greater than or less than 24, our current 2 digit year. If the value is less than 24 than it uses paste0 to concatinate the characters "19" with the value in year then changes that resulting 4 character string to a numeric 4 digits. If the value is greater than 24 then the same operation is conducted with the characters "200" in the place of "19". The results give us 4 digit years. The following mutate statement removes the last 3 digits from the Info observation, then the rename function changes the name of the "value" variable to "enrollment". The final select statement reorganizes the variables for legibility. 
 
-```{r STEP 3, eval=FALSE}
+
+```{r separate info col, eval=FALSE}
 #add year variable
 new_df<- new_df|>
   mutate(year = as.numeric(substr(Info,8,9)))|>
   #use when() statement to create 4 digit year
-  mutate(year = if_else(year>24,year>24, as.numeric(paste0("19",year)),as.numeric(paste0("200",year)))))
-
-new_df<-new_df|>
+  mutate(year = if_else(year>24,
+                        as.numeric(paste0("19",year)),
+                        as.numeric(paste0("200",year))))|>
   #change info to equal the 7 character educational code
   mutate(Info = substr(Info,1,7))|>
   rename(enrollment = value)|>
