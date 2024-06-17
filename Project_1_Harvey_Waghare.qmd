@@ -44,26 +44,14 @@ separate info col
 new_df<- new_df|>
   mutate(year = as.numeric(substr(Info,8,9)))|>
   #use when() statement to create 4 digit year
-  mutate(year = when(year>24,~as.numeric(paste0("19",year))))
-
-  # #change to full year 
-  # for (i in 1:nrow(new_df)) {
-  #   #use if greater than 24 as condition as 2024 is our current year
-  #   if(new_df$year[i] > 24){
-  #     #if true add 19 to observation, change to numeric and store 4 digits as year
-  #     new_df$year[i] <- as.numeric(paste0("19",new_df$year[i]))
-  #     }
-  #   else{
-  #     #if true add 20 to observation, change to numeric and store 4 digits as year
-  #     new_df$year[i] <- as.numeric(paste0("20",new_df$year[i]))
-  #     }
-  # }
+  mutate(year = if_else(year>24,year>24, as.numeric(paste0("19",year)),as.numeric(paste0("200",year)))))
 
 new_df<-new_df|>
   #change info to equal the 7 character educational code
   mutate(Info = substr(Info,1,7))|>
+  rename(enrollment = value)|>
   #arrange Variables for better visual
-  select(area_name, STCOU, Info, year, value)
+  select(area_name, STCOU, Info, year, enrollment)
 
 ```
 
@@ -156,6 +144,8 @@ create_longer_w_year<-function(pass_df){
                             cols = ends_with("D"))
   #add year to tibble
   passed_df<- passed_df|>
+    #rename value to enrollment
+    rename(enrollment = value)|>
     mutate(year = as.numeric(substr(Info,8,9)))|>
     #change 2 digit year to 4 digit year
     mutate(year = if_else(year>24, as.numeric(paste0("19",year)),as.numeric(paste0("200",year))))
@@ -163,7 +153,7 @@ create_longer_w_year<-function(pass_df){
   #change info to equal the 7 character educational code
   mutate(Info = substr(Info,1,7))|>
   #arrange Variables for better visual
-  select(area_name, STCOU, Info, year, value)
+  select(area_name, STCOU, Info, year, enrollment)
   return(passed_df)
   }
 ```
@@ -177,7 +167,7 @@ create_state_var<- function(county_df){
   #adds state variable using substr. substr takes area_name as the vector, uses nchar to count number of characters in area_name and subtracts 2 to find where to start, uses nchar to find last char position
     mutate("state" = substr(area_name, nchar(area_name)-2, nchar(area_name)))|>
     #rearrange variables
-    select(area_name, state, STCOU, Info, year, value)
+    select(area_name, state, STCOU, Info, year, enrollment)
   return(county_df)
   }
 ```
@@ -350,13 +340,13 @@ Putting it Together
 # combined_data <- combine_data(data_list)
 
 # Plot state data
-plot.state(combined_data$non_county, var_name = "value")
+plot.state(combined_data$non_county, var_name = "enrollment")
 
 # Plot county data with different parameters
-plot.county(combined_data$county, state = "NC", group = "top", number = 20, var_name = "value")
-plot.county(combined_data$county, state = "SC", group = "bottom", number = 7, var_name = "value")
-plot.county(combined_data$county, var_name = "value")  # Default parameters
-plot.county(combined_data$county, state = "PA", group = "top", number = 8, var_name = "value")
+plot.county(combined_data$county, state = "NC", group = "top", number = 20, var_name = "enrollment")
+plot.county(combined_data$county, state = "SC", group = "bottom", number = 7, var_name = "enrollment")
+plot.county(combined_data$county, var_name = "enrollment")  # Default parameters
+plot.county(combined_data$county, state = "PA", group = "top", number = 8, var_name = "enrollment")
 
 # Additional URLs for further processing
 additional_urls <- c(
@@ -372,12 +362,12 @@ additional_data_list <- sapply(additional_urls, my_wrapper)
 # Combine additional data
 combined_additional_data <- combine_data_sets(additional_data_list)
 # Plot additional state data
-plot.state(combined_additional_data$non_county, var_name = "value")
+plot.state(combined_additional_data$non_county, var_name = "enrollment")
 
 # Plot additional county data with different parameters
-plot.county(combined_additional_data$county, state = "CA", group = "top", number = 15, var_name = "value")
-plot.county(combined_additional_data$county, state = "TX", group = "top", number = 4, var_name = "value")
-plot.county(combined_additional_data$county, var_name = "value")  # Default parameters
-plot.county(combined_additional_data$county, state = "NY", group = "top", number = 10, var_name = "value")
+plot.county(combined_additional_data$county, state = "CA", group = "top", number = 15, var_name = "enrollment")
+plot.county(combined_additional_data$county, state = "TX", group = "top", number = 4, var_name = "enrollment")
+plot.county(combined_additional_data$county, var_name = "enrollment")  # Default parameters
+plot.county(combined_additional_data$county, state = "NY", group = "top", number = 10, var_name = "enrollment")
 
 ```
