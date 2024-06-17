@@ -303,13 +303,13 @@ plot.state <- function(df, var_name = "enrollment") {
 ```
 
 ``` {r}
-
 # Plot county function
-plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = "enrollment") {
-  if (!is.null(state)) {
-    df <- df %>% filter(state == state)
-  }
-  
+plot.county <- function(df, state_var = NULL, group = "top", number = 5, var_name = "enrollment") {
+  view(df)
+  if (!is.null(state_var)) {
+    new_df <- df %>% filter(state == state_var)
+   }
+   View(new_df)
   summary_df <- df %>%
     group_by(area_name) %>%
     summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop') %>%
@@ -320,7 +320,7 @@ plot.county <- function(df, state = NULL, group = "top", number = 5, var_name = 
   
   ggplot(plot_df, aes(x = year, y = .data[[var_name]], color = area_name)) +
     geom_line() +
-    labs(title = paste("Top/Bottom", number, "Counties in", state),
+    labs(title = paste("Top/Bottom", number, "Counties in", state_var),
          x = "Year",
          y = var_name)
 }
@@ -346,10 +346,10 @@ Putting it Together
 plot.state(combined_data$non_county, var_name = "enrollment")
 
 # Plot county data with different parameters
-plot.county(combined_data$county, state = "NC", group = "top", number = 20, var_name = "enrollment")
-plot.county(combined_data$county, state = "SC", group = "bottom", number = 7, var_name = "enrollment")
+plot.county(combined_data$county, state_var = "NC", group = "top", number = 20, var_name = "enrollment")
+plot.county(combined_data$county, state_var = "SC", group = "bottom", number = 7, var_name = "enrollment")
 plot.county(combined_data$county, var_name = "enrollment")  # Default parameters
-plot.county(combined_data$county, state = "PA", group = "top", number = 8, var_name = "enrollment")
+plot.county(combined_data$county, state_var = "PA", group = "top", number = 8, var_name = "enrollment")
 
 # Additional URLs for further processing
 additional_urls <- c(
@@ -368,9 +368,9 @@ combined_additional_data <- combine_data_sets(additional_data_list)
 plot.state(combined_additional_data$non_county, var_name = "enrollment")
 
 # Plot additional county data with different parameters
-plot.county(combined_additional_data$county, state = "CA", group = "top", number = 15, var_name = "enrollment")
-plot.county(combined_additional_data$county, state = "TX", group = "top", number = 4, var_name = "enrollment")
+plot.county(combined_additional_data$county, state_var = "CA", group = "top", number = 15, var_name = "enrollment")
+plot.county(combined_additional_data$county, state_var = "TX", group = "top", number = 4, var_name = "enrollment")
 plot.county(combined_additional_data$county, var_name = "enrollment")  # Default parameters
-plot.county(combined_additional_data$county, state = "NY", group = "top", number = 10, var_name = "enrollment")
+plot.county(combined_additional_data$county, state_var = "NY", group = "top", number = 10, var_name = "enrollment")
 
 ```
