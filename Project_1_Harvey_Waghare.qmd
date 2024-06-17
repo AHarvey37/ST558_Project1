@@ -305,12 +305,17 @@ plot.state <- function(df, var_name = "enrollment") {
 ``` {r}
 # Plot county function
 plot.county <- function(df, state_var = NULL, group = "top", number = 5, var_name = "enrollment") {
-  view(df)
   if (!is.null(state_var)) {
-    new_df <- df %>% filter(state == state_var)
-   }
-   View(new_df)
-  summary_df <- df %>%
+    #created a new variable for legibility 
+    new_df <- df %>%
+      #this line removes a space that is being added into every observation of the state var
+      mutate(state = substr(state, nchar(state)-1, nchar(state)))%>%
+      filter(state == state_var)
+  }
+  else{
+    new_df<-df
+  }
+  summary_df <- new_df %>%
     group_by(area_name) %>%
     summarize(mean_value = mean(.data[[var_name]], na.rm = TRUE), .groups = 'drop') %>%
     arrange(if (group == "top") desc(mean_value) else mean_value) %>%
