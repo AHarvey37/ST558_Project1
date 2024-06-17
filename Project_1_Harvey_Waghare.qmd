@@ -42,7 +42,7 @@ new_df <- pivot_longer(cleaned_DF,
 This chunk takes our new long table tibble and adds a numeric year variable using the mutate and substr functions. Substr looks at the Info variable (which has a fixed length of 10) and pulls out the characters at positions 8 through 9. The as.numeric coerses those characters into numbers which are then assigned to the year variable. The next mutate statement takes that 2 digit year and creates a 4 digit year using the if_else statement. Since our data only includes observations AFTER 1986 the statement compares if the value of year is greater than or less than 24, our current 2 digit year. If the value is less than 24 than it uses paste0 to concatinate the characters "19" with the value in year then changes that resulting 4 character string to a numeric 4 digits. If the value is greater than 24 then the same operation is conducted with the characters "200" in the place of "19". The results give us 4 digit years. The following mutate statement removes the last 3 digits from the Info observation, then the rename function changes the name of the "value" variable to "enrollment". The final select statement reorganizes the variables for legibility. 
 
 
-```{r separate info col, eval=FALSE}
+```{r Separate info col, eval=FALSE}
 #add year variable
 new_df<- new_df|>
   mutate(year = as.numeric(substr(Info,8,9)))|>
