@@ -1,5 +1,5 @@
 ---
-title: "Project1_Harvey_Waghare"
+title: "ST 558 Project 1"
 author: "Andrew Harvey & Nishad Waghare"
 date: "18 June 2024"
 format: html
@@ -8,9 +8,12 @@ editor: visual
 
 # Project 1
 
-## Initial Data Processing Steps
+## Data Processing "First Steps"
 
 The follow code chunks were written to execute steps 1 - 6 from the data processing section in preparation for creating the functions that will be utilized in the data processing. These chunks **do not execute** (with the exception of the first) and are only included to display how the functions were developed prior to their actual creation.
+
+
+#### Step 0
 
 This first chunk's purpose is to load all libraries that are used though out the document. The tidyverse is the only library used and thus is the only statement within the chunk. 
 
@@ -18,6 +21,7 @@ This first chunk's purpose is to load all libraries that are used though out the
 #read in tidyverse 
 library(tidyverse)
 ```
+#### Step 1
 
 This next chunk is the thought process for reviewing data that will be read in and changing names as applicable. First the chunk reads in a comma separated file from the provided website and stores it as a tibble named "raw_DF". Next, the variable "Area_name" was changed, using the rename function, "to area_name". Finally, the variables area_name, STCOU, and all variables that end with "D" are selected and stored in a new tibble. 
 
@@ -31,6 +35,8 @@ cleaned_DF<- raw_DF|>
   select(area_name, STCOU, ends_with("D"))
 ```
 
+#### Step 2
+
 The next chunk takes the "cleaned_DF" and changes it from a wide table to a long table using the pivot_longer function. It's output results in every area_name having one observation. 
 
 ```{r Create Long Table,eval=FALSE}
@@ -38,6 +44,8 @@ new_df <- pivot_longer(cleaned_DF,
                        names_to = "Info",
                        cols = ends_with("D"))
 ```
+
+#### Step 3
 
 This chunk takes our new long table tibble and adds a numeric year variable using the mutate and substr functions. Substr looks at the Info variable (which has a fixed length of 10) and pulls out the characters at positions 8 through 9. The as.numeric coerses those characters into numbers which are then assigned to the year variable. The next mutate statement takes that 2 digit year and creates a 4 digit year using the if_else statement. Since our data only includes observations AFTER 1986 the statement compares if the value of year is greater than or less than 24, our current 2 digit year. If the value is less than 24 than it uses paste0 to concatinate the characters "19" with the value in year then changes that resulting 4 character string to a numeric 4 digits. If the value is greater than 24 then the same operation is conducted with the characters "200" in the place of "19". The results give us 4 digit years. The following mutate statement removes the last 3 digits from the Info observation, then the rename function changes the name of the "value" variable to "enrollment". The final select statement reorganizes the variables for legibility. 
 
@@ -58,8 +66,11 @@ new_df<- new_df|>
 
 ```
 
-Divide into 2 datasets
-```{r STEP 4, eval=FALSE}
+#### Step 4
+
+This chunk divides the long tibble into two separate tibbles named "county_df" and "nonCounty_DF". First the chunk creates a vector x and stores a string pattern to look for in the vector area_name within the tibble new_df. That pattern corresponds with observations that will be added to the county_df so the new line subsets the new_df where rows are equal to those found in x then stores those rows in the county_df. The following line then subtracts observations in x from new_df and stores the remaining observations in nonCounty_df. A quick test is conducted to ensure no rows were lost when creating the two new tibbles. A class of "county" and "non-county" are assigned to the corresponding tibbles
+
+```{r Divide Into 2 Data Sets, eval=FALSE}
 #find indices of observations that belong in county data set
 x<-grep(pattern = ", \\w\\w",new_df$area_name)
 #create county data set
@@ -77,8 +88,11 @@ class(county_df)
 class(nonCounty_df)
 ```
 
-Create states in county data set
-```{r STEP 5, eval=FALSE}
+#### Step 5
+
+This chunk uses the mutate and substr functions to add and fill a new variable named "state" to the county data set. Since the length of area_name changes from observation to observation we use nchar(area_name) to get the length of the observation then subtract 2 to obtain the start point for substr. Nchar(area_name) is then used again to find the end position for substr. Select is used to rearrange the columns to a more legible configuration. 
+
+```{r Create States in County Data Set, eval=FALSE}
 #add State variable to county data set
 county_df<- county_df|>
   #adds state variable using substr. substr takes area_name as the vector, uses nchar to count number of characters in area_name and subtracts 2 to find where to start, uses nchar to find last char position
@@ -87,8 +101,11 @@ county_df<- county_df|>
   select(area_name, state, STCOU, Info, year, value)
 ```
 
-create division in non-county data set
-```{r STEP 6, eval=FALSE}
+#### Step 6
+
+Now the non-county tibble must be worked on. This chunk creates 9 character vectors named "division1" - "division9" and stores the full names of states in the corresponding division. The toupper function is used to quickly capitalize all of the strings. Next a series of if_else statements are used to check area_name within the non-county tibble and determine its division then fill the division variable with the appropriate string. If there is no appropriate division then the string will be "ERROR".   
+
+```{r Create Division in Non-County Data Set, eval=FALSE}
 #create division vectors
 division1 <- toupper(c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island","Vermont"))
 division2 <- toupper(c("New Jersey", "New York", "Pennsylvania"))
@@ -123,9 +140,14 @@ nonCounty_df<- nonCounty_df|>
 ```
 
 
-## Data Processing Functions
+## Data Processing Requirements
 
-function1
+The below functions are functional and reflect the operations in steps 1 - step 6 but are now user defined functions to be used more seamlessly. These chunks **ARE** executed. 
+
+#### Bullet 1
+
+This function takes in one data frame and conducts the same operations as step 1, renaming "Area_name" and selecting the appropriate variables. The function then returns the altered tibble.
+
 ```{r function 1}
 rename_and_select <- function(raw_df){
   pass_df<-raw_df|>
@@ -137,8 +159,10 @@ rename_and_select <- function(raw_df){
 }
 ```
 
+#### Bullet 2
 
-function2
+This function takes in one data frame and converts it to a long table from a wide table using the operations in step 2. It also adds the 4 digit "year" variable to the new tibble as seen in step 3. The function then returns the altered tibble. 
+
 ```{r function 2}
 create_longer_w_year<-function(pass_df){
   #create new tibble
@@ -161,8 +185,10 @@ create_longer_w_year<-function(pass_df){
   }
 ```
 
+#### Bullet 3
 
-function 3
+This function takes in one data frame and creates a state variable using mutate and nchar, as seen in step 5. It then returns the altered tibble. 
+
 ```{r function 3}
 create_state_var<- function(county_df){
   #add State variable to county data set
@@ -175,7 +201,10 @@ create_state_var<- function(county_df){
   }
 ```
 
-function 4
+#### Bullet 4
+
+This function takes in one tibble and and creates the division variable using the same operations as step 6. The function then returns the altered tibble. 
+
 ```{r function 4}
 create_division_var<- function(nonCounty_df){
   #create division vectors
@@ -214,7 +243,10 @@ create_division_var<- function(nonCounty_df){
   }
 ```
 
-function 6
+#### Bullet 5
+
+This function takes in one data frame, splits it into two tibbles and assigns then new classes. This function follows the same operations as step 4. This function also calls the functions made in bullets 3 and 4 in order to create the state and division variables within their appropriate tibbles. This function returns a list containing the two new tibbles. 
+
 ```{r function 6}
 split_tibbles<- function(pass_df){
   #find indices of observations that belong in county data set
@@ -233,11 +265,12 @@ split_tibbles<- function(pass_df){
 }
 ```
 
-### Create wrapper function
+#### Create wrapper function
 
-put it together
-```{r wrapper}
-my_wrapper <- function(url, pass_df = as.tibble(c(1:5))){
+This function takes in two arguments. The first is user defined url which will be used to read in a csv file. The second is a null tibble. This tibble will then be filled using the read.csv(url) statement. Then the tibble will be passed through the user defined functions that were created in bullet 1 - bullet 5. The wrapper will return a list containing 2 tibbles named country and noncountry.  
+
+```{r create wrapper}
+my_wrapper <- function(url, pass_df = as.tibble(NULL)){
   pass_df<-read.csv(url)|>
     rename_and_select()|>
     create_longer_w_year()|>
@@ -251,35 +284,49 @@ test wrapper
 my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
-### Create 2 lists using above functions and wrapper
+#### Call It and Combine Your data
+
+This chunk uses the sapply function to take 2 urls and apply the "my_wrapper" function to both individually. It will return 2 lists each containing 2 tibbles named "county" and non_county". These 2 lists are then stored into "list1" which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.
 
 parse two data sets
-```{r parse}
+```{r Parse Two Data Sets}
 list1<-sapply(c("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv","https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"), my_wrapper)
 
 #test
 print(list1)
+print(list1[[1]])
 print(list1[[2]])
 print(list1[[3]])
 print(list1[[4]])
 ```
-## Combine data function
+#### Combine Data Sets Function
 
-combine data
-```{r combine function}
+This function takes in a list containing 2 lists and returns one list containing 2 tibbles. Since we know that county tibbles are in the odd elements we will combine elements 1 and 3 then store them in the combined_county tibble. This means that noncounty tibbles are in the even elements so we use bind_rows with elements 2 and 4 then store them in combined_noncounty tibble. We also assign the appropriate class to each tibble and rename them for easier referencing later. 
+
+```{r Combine Data Sets Function}
 combine_data_sets <-function(list1){
+  # use bind rows to combine both county tibbles
   combined_county<-bind_rows(list1[[1]],list1[[3]])
+  # assign class
   class(combined_county)<- c("county",class(combined_county))
+  # use bind rows to combine both non_county tibbles
   combined_noncounty<-bind_rows(list1[[2]],list1[[4]])
+  # assign class
   class(combined_noncounty)<- c("non_county",class(combined_noncounty))
+  # store tibbles in list
   x<-list(combined_county,combined_noncounty)
+  # name each tibble for easier subsetting latter
   names(x)<-c("county","non_county")
+  #return list of tibbles
   return(x)
 }
 ```
 
-### Test combination
-```{r}
+#### Test combination
+
+Finally, we test the previous function to ensure that everything is working correctly. 
+
+```{r Test Combining Data Sets}
 combined_data <- combine_data_sets(list1)
 names(combined_data)<- c("county","non_county")
 combined_data$county
