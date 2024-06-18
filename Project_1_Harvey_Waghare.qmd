@@ -142,11 +142,11 @@ nonCounty_df<- nonCounty_df|>
 
 ## Data Processing Requirements
 
-The below functions are functional and reflect the operations in steps 1 - step 6 but are now user defined functions to be used more seamlessly. These chunks **ARE** executed. 
+The below functions are functional and reflect the operations in *Steps 1* - *Step 6* but are now user defined functions to be used more seamlessly. These chunks **ARE** executed. 
 
 #### Bullet 1
 
-This function takes in one data frame and conducts the same operations as step 1, renaming "Area_name" and selecting the appropriate variables. The function then returns the altered tibble.
+This function takes in one data frame and conducts the same operations as *Step 1*, renaming "Area_name" and selecting the appropriate variables. The function then returns the altered tibble.
 
 ```{r function 1}
 rename_and_select <- function(raw_df){
@@ -161,7 +161,7 @@ rename_and_select <- function(raw_df){
 
 #### Bullet 2
 
-This function takes in one data frame and converts it to a long table from a wide table using the operations in step 2. It also adds the 4 digit "year" variable to the new tibble as seen in step 3. The function then returns the altered tibble. 
+This function takes in one data frame and converts it to a long table from a wide table using the operations in *Step 2*. It also adds the 4 digit "year" variable to the new tibble as seen in *Step 3*. The function then returns the altered tibble. 
 
 ```{r function 2}
 create_longer_w_year<-function(pass_df){
@@ -187,7 +187,7 @@ create_longer_w_year<-function(pass_df){
 
 #### Bullet 3
 
-This function takes in one data frame and creates a state variable using mutate and nchar, as seen in step 5. It then returns the altered tibble. 
+This function takes in one data frame and creates a state variable using mutate and nchar, as seen in *Step 5*. It then returns the altered tibble. 
 
 ```{r function 3}
 create_state_var<- function(county_df){
@@ -203,7 +203,7 @@ create_state_var<- function(county_df){
 
 #### Bullet 4
 
-This function takes in one tibble and and creates the division variable using the same operations as step 6. The function then returns the altered tibble. 
+This function takes in one tibble and and creates the division variable using the same operations as *Step 6*. The function then returns the altered tibble. 
 
 ```{r function 4}
 create_division_var<- function(nonCounty_df){
@@ -245,7 +245,7 @@ create_division_var<- function(nonCounty_df){
 
 #### Bullet 5
 
-This function takes in one data frame, splits it into two tibbles and assigns then new classes. This function follows the same operations as step 4. This function also calls the functions made in bullets 3 and 4 in order to create the state and division variables within their appropriate tibbles. This function returns a list containing the two new tibbles. 
+This function takes in one data frame, splits it into two tibbles and assigns then new classes. This function follows the same operations as *Step 4*. This function also calls the functions made in *Bullet 3* and *Bullet 4* in order to create the state and division variables within their appropriate tibbles. This function returns a list containing the two new tibbles. 
 
 ```{r function 6}
 split_tibbles<- function(pass_df){
@@ -267,7 +267,7 @@ split_tibbles<- function(pass_df){
 
 #### Create wrapper function
 
-This function takes in two arguments. The first is user defined url which will be used to read in a csv file. The second is a null tibble. This tibble will then be filled using the read.csv(url) statement. Then the tibble will be passed through the user defined functions that were created in bullet 1 - bullet 5. The wrapper will return a list containing 2 tibbles named country and noncountry.  
+This function takes in two arguments. The first is user defined url which will be used to read in a csv file. The second is a null tibble. This tibble will then be filled using the read.csv(url) statement. Then the tibble will be passed through the user defined functions that were created in *Bullet 1* - *Bullet 5*. The wrapper will return a list containing 2 tibbles named country and noncountry.  
 
 ```{r create wrapper}
 my_wrapper <- function(url, pass_df = as.tibble(NULL)){
