@@ -285,7 +285,7 @@ my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 
 #### Call It and Combine Your data
 
-This chunk uses the sapply function to take 2 urls and apply the "my_wrapper" function to both individually. It will return 2 lists each containing 2 tibbles named "county" and non_county". These 2 lists are then stored into "list1" which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.
+This chunk uses the sapply function to take 2 urls and apply the `my_wrapper` function to both individually. It will return 2 lists each containing 2 tibbles named "county" and non_county". These 2 lists are then stored into "list1" which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.
 
 parse two data sets
 
@@ -358,7 +358,7 @@ plot.state <- function(df, var_name = "enrollment") {
 
 #### Plot County Data
 
-The plot.county function is used to visualize enrollment data for specific counties within a given state. The function can filter data based on the state, and it allows for plotting either the top or bottom counties based on average enrollment. It takes in a dataframe, the state abbreviation, the group ("top" or "bottom"), the number of counties to plot, and the variable name for enrollment. The function filters the data for the specified state, calculates the mean enrollment for each county, and creates a line plot with ggplot2.
+The `plot.county` function is used to visualize enrollment data for specific counties within a given state. The function can filter data based on the state, and it allows for plotting either the top or bottom counties based on average enrollment. It takes in a dataframe, the state abbreviation, the group ("top" or "bottom"), the number of counties to plot, and the variable name for enrollment. The function filters the data for the specified state, calculates the mean enrollment for each county, and creates a line plot with ggplot2.
 
 ```{r Plot County Function}
 # Plot county function

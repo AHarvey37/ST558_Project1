@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew Harvey &amp; Nishad Waghare">
+<meta name="author" content="Andrew Harvey &amp; Nishad Waghmare">
 <meta name="dcterms.date" content="2024-06-18">
 
 <title>ST 558 Project 1</title>
@@ -128,7 +128,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Andrew Harvey &amp; Nishad Waghare </p>
+             <p>Andrew Harvey &amp; Nishad Waghmare </p>
           </div>
   </div>
     
@@ -454,7 +454,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="call-it-and-combine-your-data" class="level4">
 <h4 class="anchored" data-anchor-id="call-it-and-combine-your-data">Call It and Combine Your data</h4>
-<p>This chunk uses the sapply function to take 2 urls and apply the “my_wrapper” function to both individually. It will return 2 lists each containing 2 tibbles named “county” and non_county”. These 2 lists are then stored into “list1” which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.</p>
+<p>This chunk uses the sapply function to take 2 urls and apply the <code>my_wrapper</code> function to both individually. It will return 2 lists each containing 2 tibbles named “county” and non_county”. These 2 lists are then stored into “list1” which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.</p>
 <p>parse two data sets</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>list1<span class="ot">&lt;-</span><span class="fu">sapply</span>(<span class="fu">c</span>(<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"</span>,<span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span>), my_wrapper)</span>
@@ -606,6 +606,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="plotting-functions" class="level2">
 <h2 class="anchored" data-anchor-id="plotting-functions">Plotting Functions</h2>
+<section id="plot-state-data" class="level4">
+<h4 class="anchored" data-anchor-id="plot-state-data">Plot State Data</h4>
+<p>The following function, <code>plot.state</code>, is designed to visualize the mean enrollment over time for each division. It takes in a dataframe and the variable name for enrollment. The function filters out any rows with “ERROR” in the division, groups the data by year and division, and calculates the mean enrollment. It then creates a line plot using ggplot2, with the year on the x-axis, mean enrollment on the y-axis, and different lines for each division.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot state function</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>plot.state <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
@@ -621,6 +624,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Mean Enrollment"</span>)</span>
 <span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="plot-county-data" class="level4">
+<h4 class="anchored" data-anchor-id="plot-county-data">Plot County Data</h4>
+<p>The <code>plot.county</code> function is used to visualize enrollment data for specific counties within a given state. The function can filter data based on the state, and it allows for plotting either the top or bottom counties based on average enrollment. It takes in a dataframe, the state abbreviation, the group (“top” or “bottom”), the number of counties to plot, and the variable name for enrollment. The function filters the data for the specified state, calculates the mean enrollment for each county, and creates a line plot with ggplot2.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot county function</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>plot.county <span class="ot">&lt;-</span> <span class="cf">function</span>(df, <span class="at">state_var =</span> <span class="cn">NULL</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">5</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>) {</span>
@@ -649,120 +656,146 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> var_name)</span>
 <span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Putting it Together</p>
+</section>
+</section>
+<section id="putting-it-together" class="level2">
+<h2 class="anchored" data-anchor-id="putting-it-together">Putting it Together</h2>
+<p>In this section, we will integrate the data processing and plotting functions. We will process data from multiple URLs, combine the results, and generate various plots to visualize the enrollment data.</p>
+<section id="process-and-combine-data" class="level4">
+<h4 class="anchored" data-anchor-id="process-and-combine-data">Process and Combine Data</h4>
+<p>First, we define the URLs of the datasets to be processed. We use the <code>my_wrapper</code> function to process each dataset and store the results in a list. The <code>combine_data_sets</code> function is then used to combine the processed datasets into a single list containing county and non-county data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># URLs of datasets</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># urls &lt;- c(</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>urls <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># # Process data</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="co"># data_list &lt;- lapply(urls, process_data)</span></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># # Combine data</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co"># combined_data &lt;- combine_data(data_list)</span></span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot state data</span></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.state</span>(combined_data<span class="sc">$</span>non_county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Process data</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">sapply</span>(urls, my_wrapper)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine data</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> <span class="fu">combine_data_sets</span>(data_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plot-state-data-1" class="level4">
+<h4 class="anchored" data-anchor-id="plot-state-data-1">Plot State Data</h4>
+<p>Next, we use the plot.state function to visualize the mean enrollment over time for each division in the combined non-county data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot state data</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.state</span>(combined_data<span class="sc">$</span>non_county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Plot State Data-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot county data with different parameters</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"NC"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">20</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plot-county-data-1" class="level4">
+<h4 class="anchored" data-anchor-id="plot-county-data-1">Plot County Data</h4>
+<p>We then use the plot.county function to visualize enrollment data for counties within specific states. We create plots for North Carolina (NC), South Carolina (SC), Pennsylvania (PA), and use the default settings for a general plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot county data with different parameters</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"NC"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">20</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Plot County Data-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"SC"</span>, <span class="at">group =</span> <span class="st">"bottom"</span>, <span class="at">number =</span> <span class="dv">7</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"SC"</span>, <span class="at">group =</span> <span class="st">"bottom"</span>, <span class="at">number =</span> <span class="dv">7</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-3.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Plot County Data-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)  <span class="co"># Default parameters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)  <span class="co"># Default parameters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-4.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Plot County Data-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"PA"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">8</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"PA"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">8</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-5.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Plot County Data-4.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Additional URLs for further processing</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>additional_urls <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv"</span>,</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv"</span>,</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv"</span>,</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv"</span></span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Process additional data</span></span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>additional_data_list <span class="ot">&lt;-</span> <span class="fu">sapply</span>(additional_urls, my_wrapper)</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine additional data</span></span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>combined_additional_data <span class="ot">&lt;-</span> <span class="fu">combine_data_sets</span>(additional_data_list)</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot additional state data</span></span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.state</span>(combined_additional_data<span class="sc">$</span>non_county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="process-and-plot-additional-data" class="level4">
+<h4 class="anchored" data-anchor-id="process-and-plot-additional-data">Process and Plot Additional Data</h4>
+<p>We also process additional datasets, combine them, and generate plots to visualize the enrollment data for other states.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Additional URLs for further processing</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>additional_urls <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv"</span>,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv"</span>,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv"</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv"</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Process additional data</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>additional_data_list <span class="ot">&lt;-</span> <span class="fu">sapply</span>(additional_urls, my_wrapper)</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine additional data</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>combined_additional_data <span class="ot">&lt;-</span> <span class="fu">combine_data_sets</span>(additional_data_list)</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot additional state data</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.state</span>(combined_additional_data<span class="sc">$</span>non_county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-6.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Process Additional Data-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot additional county data with different parameters</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"CA"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">15</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot additional county data with different parameters</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"CA"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">15</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-7.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Process Additional Data-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"TX"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">4</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"TX"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">4</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-8.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Process Additional Data-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)  <span class="co"># Default parameters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)  <span class="co"># Default parameters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-9.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Process Additional Data-4.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"NY"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">10</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.county</span>(combined_additional_data<span class="sc">$</span>county, <span class="at">state_var =</span> <span class="st">"NY"</span>, <span class="at">group =</span> <span class="st">"top"</span>, <span class="at">number =</span> <span class="dv">10</span>, <span class="at">var_name =</span> <span class="st">"enrollment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Project_1_Harvey_Waghare_files/figure-html/unnamed-chunk-3-10.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Project_1_Harvey_Waghare_files/figure-html/Process Additional Data-5.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 
 
+</section>
 </section>
 </section>
 
