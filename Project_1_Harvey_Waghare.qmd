@@ -12,18 +12,18 @@ editor: visual
 
 The follow code chunks were written to execute steps 1 - 6 from the data processing section in preparation for creating the functions that will be utilized in the data processing. These chunks **do not execute** (with the exception of the first) and are only included to display how the functions were developed prior to their actual creation.
 
-
 #### Step 0
 
-This first chunk's purpose is to load all libraries that are used though out the document. The tidyverse is the only library used and thus is the only statement within the chunk. 
+This first chunk's purpose is to load all libraries that are used though out the document. The tidyverse is the only library used and thus is the only statement within the chunk.
 
 ```{r Load tidyverse}
 #read in tidyverse 
 library(tidyverse)
 ```
+
 #### Step 1
 
-This next chunk is the thought process for reviewing data that will be read in and changing names as applicable. First the chunk reads in a comma separated file from the provided website and stores it as a tibble named "raw_DF". Next, the variable "Area_name" was changed, using the rename function, "to area_name". Finally, the variables area_name, STCOU, and all variables that end with "D" are selected and stored in a new tibble. 
+This next chunk is the thought process for reviewing data that will be read in and changing names as applicable. First the chunk reads in a comma separated file from the provided website and stores it as a tibble named "raw_DF". Next, the variable "Area_name" was changed, using the rename function, "to area_name". Finally, the variables area_name, STCOU, and all variables that end with "D" are selected and stored in a new tibble.
 
 ```{r Review data and change names, eval=FALSE}
 #create tibble from data on website
@@ -37,7 +37,7 @@ cleaned_DF<- raw_DF|>
 
 #### Step 2
 
-The next chunk takes the "cleaned_DF" and changes it from a wide table to a long table using the pivot_longer function. It's output results in every area_name having one observation. 
+The next chunk takes the "cleaned_DF" and changes it from a wide table to a long table using the pivot_longer function. It's output results in every area_name having one observation.
 
 ```{r Create Long Table,eval=FALSE}
 new_df <- pivot_longer(cleaned_DF, 
@@ -47,8 +47,7 @@ new_df <- pivot_longer(cleaned_DF,
 
 #### Step 3
 
-This chunk takes our new long table tibble and adds a numeric year variable using the mutate and substr functions. Substr looks at the Info variable (which has a fixed length of 10) and pulls out the characters at positions 8 through 9. The as.numeric coerses those characters into numbers which are then assigned to the year variable. The next mutate statement takes that 2 digit year and creates a 4 digit year using the if_else statement. Since our data only includes observations AFTER 1986 the statement compares if the value of year is greater than or less than 24, our current 2 digit year. If the value is less than 24 than it uses paste0 to concatinate the characters "19" with the value in year then changes that resulting 4 character string to a numeric 4 digits. If the value is greater than 24 then the same operation is conducted with the characters "200" in the place of "19". The results give us 4 digit years. The following mutate statement removes the last 3 digits from the Info observation, then the rename function changes the name of the "value" variable to "enrollment". The final select statement reorganizes the variables for legibility. 
-
+This chunk takes our new long table tibble and adds a numeric year variable using the mutate and substr functions. Substr looks at the Info variable (which has a fixed length of 10) and pulls out the characters at positions 8 through 9. The as.numeric coerses those characters into numbers which are then assigned to the year variable. The next mutate statement takes that 2 digit year and creates a 4 digit year using the if_else statement. Since our data only includes observations AFTER 1986 the statement compares if the value of year is greater than or less than 24, our current 2 digit year. If the value is less than 24 than it uses paste0 to concatinate the characters "19" with the value in year then changes that resulting 4 character string to a numeric 4 digits. If the value is greater than 24 then the same operation is conducted with the characters "200" in the place of "19". The results give us 4 digit years. The following mutate statement removes the last 3 digits from the Info observation, then the rename function changes the name of the "value" variable to "enrollment". The final select statement reorganizes the variables for legibility.
 
 ```{r Separate info col, eval=FALSE}
 #add year variable
@@ -90,7 +89,7 @@ class(nonCounty_df)
 
 #### Step 5
 
-This chunk uses the mutate and substr functions to add and fill a new variable named "state" to the county data set. Since the length of area_name changes from observation to observation we use nchar(area_name) to get the length of the observation then subtract 2 to obtain the start point for substr. Nchar(area_name) is then used again to find the end position for substr. Select is used to rearrange the columns to a more legible configuration. 
+This chunk uses the mutate and substr functions to add and fill a new variable named "state" to the county data set. Since the length of area_name changes from observation to observation we use nchar(area_name) to get the length of the observation then subtract 2 to obtain the start point for substr. Nchar(area_name) is then used again to find the end position for substr. Select is used to rearrange the columns to a more legible configuration.
 
 ```{r Create States in County Data Set, eval=FALSE}
 #add State variable to county data set
@@ -103,7 +102,7 @@ county_df<- county_df|>
 
 #### Step 6
 
-Now the non-county tibble must be worked on. This chunk creates 9 character vectors named "division1" - "division9" and stores the full names of states in the corresponding division. The toupper function is used to quickly capitalize all of the strings. Next a series of if_else statements are used to check area_name within the non-county tibble and determine its division then fill the division variable with the appropriate string. If there is no appropriate division then the string will be "ERROR".   
+Now the non-county tibble must be worked on. This chunk creates 9 character vectors named "division1" - "division9" and stores the full names of states in the corresponding division. The toupper function is used to quickly capitalize all of the strings. Next a series of if_else statements are used to check area_name within the non-county tibble and determine its division then fill the division variable with the appropriate string. If there is no appropriate division then the string will be "ERROR".
 
 ```{r Create Division in Non-County Data Set, eval=FALSE}
 #create division vectors
@@ -139,10 +138,9 @@ nonCounty_df<- nonCounty_df|>
                                                                                               "ERROR"))))))))))
 ```
 
-
 ## Data Processing Requirements
 
-The below functions are functional and reflect the operations in *Steps 1* - *Step 6* but are now user defined functions to be used more seamlessly. These chunks **ARE** executed. 
+The below functions are functional and reflect the operations in *Steps 1* - *Step 6* but are now user defined functions to be used more seamlessly. These chunks **ARE** executed.
 
 #### Bullet 1
 
@@ -161,7 +159,7 @@ rename_and_select <- function(raw_df){
 
 #### Bullet 2
 
-This function takes in one data frame and converts it to a long table from a wide table using the operations in *Step 2*. It also adds the 4 digit "year" variable to the new tibble as seen in *Step 3*. The function then returns the altered tibble. 
+This function takes in one data frame and converts it to a long table from a wide table using the operations in *Step 2*. It also adds the 4 digit "year" variable to the new tibble as seen in *Step 3*. The function then returns the altered tibble.
 
 ```{r function 2}
 create_longer_w_year<-function(pass_df){
@@ -187,7 +185,7 @@ create_longer_w_year<-function(pass_df){
 
 #### Bullet 3
 
-This function takes in one data frame and creates a state variable using mutate and nchar, as seen in *Step 5*. It then returns the altered tibble. 
+This function takes in one data frame and creates a state variable using mutate and nchar, as seen in *Step 5*. It then returns the altered tibble.
 
 ```{r function 3}
 create_state_var<- function(county_df){
@@ -203,7 +201,7 @@ create_state_var<- function(county_df){
 
 #### Bullet 4
 
-This function takes in one tibble and and creates the division variable using the same operations as *Step 6*. The function then returns the altered tibble. 
+This function takes in one tibble and and creates the division variable using the same operations as *Step 6*. The function then returns the altered tibble.
 
 ```{r function 4}
 create_division_var<- function(nonCounty_df){
@@ -245,7 +243,7 @@ create_division_var<- function(nonCounty_df){
 
 #### Bullet 5
 
-This function takes in one data frame, splits it into two tibbles and assigns then new classes. This function follows the same operations as *Step 4*. This function also calls the functions made in *Bullet 3* and *Bullet 4* in order to create the state and division variables within their appropriate tibbles. This function returns a list containing the two new tibbles. 
+This function takes in one data frame, splits it into two tibbles and assigns then new classes. This function follows the same operations as *Step 4*. This function also calls the functions made in *Bullet 3* and *Bullet 4* in order to create the state and division variables within their appropriate tibbles. This function returns a list containing the two new tibbles.
 
 ```{r function 6}
 split_tibbles<- function(pass_df){
@@ -267,7 +265,7 @@ split_tibbles<- function(pass_df){
 
 #### Create wrapper function
 
-This function takes in two arguments. The first is user defined url which will be used to read in a csv file. The second is a null tibble. This tibble will then be filled using the read.csv(url) statement. Then the tibble will be passed through the user defined functions that were created in *Bullet 1* - *Bullet 5*. The wrapper will return a list containing 2 tibbles named country and noncountry.  
+This function takes in two arguments. The first is user defined url which will be used to read in a csv file. The second is a null tibble. This tibble will then be filled using the read.csv(url) statement. Then the tibble will be passed through the user defined functions that were created in *Bullet 1* - *Bullet 5*. The wrapper will return a list containing 2 tibbles named country and noncountry.
 
 ```{r create wrapper}
 my_wrapper <- function(url, pass_df = as.tibble(NULL)){
@@ -280,6 +278,7 @@ my_wrapper <- function(url, pass_df = as.tibble(NULL)){
 ```
 
 test wrapper
+
 ```{r test wrapper}
 my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
@@ -289,6 +288,7 @@ my_wrapper("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 This chunk uses the sapply function to take 2 urls and apply the "my_wrapper" function to both individually. It will return 2 lists each containing 2 tibbles named "county" and non_county". These 2 lists are then stored into "list1" which is also a list. To ensure that everything is working correctly the chunk prints out the elements of list1.
 
 parse two data sets
+
 ```{r Parse Two Data Sets}
 list1<-sapply(c("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv","https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"), my_wrapper)
 
@@ -299,9 +299,10 @@ print(list1[[2]])
 print(list1[[3]])
 print(list1[[4]])
 ```
+
 #### Combine Data Sets Function
 
-This function takes in a list containing 2 lists and returns one list containing 2 tibbles. Since we know that county tibbles are in the odd elements we will combine elements 1 and 3 then store them in the combined_county tibble. This means that noncounty tibbles are in the even elements so we use bind_rows with elements 2 and 4 then store them in combined_noncounty tibble. We also assign the appropriate class to each tibble and rename them for easier referencing later. 
+This function takes in a list containing 2 lists and returns one list containing 2 tibbles. Since we know that county tibbles are in the odd elements we will combine elements 1 and 3 then store them in the combined_county tibble. This means that noncounty tibbles are in the even elements so we use bind_rows with elements 2 and 4 then store them in combined_noncounty tibble. We also assign the appropriate class to each tibble and rename them for easier referencing later.
 
 ```{r Combine Data Sets Function}
 combine_data_sets <-function(list1){
@@ -324,7 +325,7 @@ combine_data_sets <-function(list1){
 
 #### Test combination
 
-Finally, we test the previous function to ensure that everything is working correctly. 
+Finally, we test the previous function to ensure that everything is working correctly.
 
 ```{r Test Combining Data Sets}
 combined_data <- combine_data_sets(list1)
@@ -333,10 +334,13 @@ combined_data$county
 combined_data$non_county
 ```
 
-
 ## Plotting Functions
 
-```{r}
+#### Plot State Data
+
+The following function, `plot.state`, is designed to visualize the mean enrollment over time for each division. It takes in a dataframe and the variable name for enrollment. The function filters out any rows with "ERROR" in the division, groups the data by year and division, and calculates the mean enrollment. It then creates a line plot using ggplot2, with the year on the x-axis, mean enrollment on the y-axis, and different lines for each division.
+
+```{r Plot State Function}
 # Plot state function
 plot.state <- function(df, var_name = "enrollment") {
   df <- df %>%
@@ -352,7 +356,11 @@ plot.state <- function(df, var_name = "enrollment") {
 } 
 ```
 
-``` {r}
+#### Plot County Data
+
+The plot.county function is used to visualize enrollment data for specific counties within a given state. The function can filter data based on the state, and it allows for plotting either the top or bottom counties based on average enrollment. It takes in a dataframe, the state abbreviation, the group ("top" or "bottom"), the number of counties to plot, and the variable name for enrollment. The function filters the data for the specified state, calculates the mean enrollment for each county, and creates a line plot with ggplot2.
+
+```{r Plot County Function}
 # Plot county function
 plot.county <- function(df, state_var = NULL, group = "top", number = 5, var_name = "enrollment") {
   if (!is.null(state_var)) {
@@ -382,30 +390,55 @@ plot.county <- function(df, state_var = NULL, group = "top", number = 5, var_nam
 
 ```
 
-Putting it Together
+## Putting it Together
 
-```{r}
+In this section, we will integrate the data processing and plotting functions. We will process data from multiple URLs, combine the results, and generate various plots to visualize the enrollment data.
+
+#### Process and Combine Data
+
+First, we define the URLs of the datasets to be processed. We use the `my_wrapper` function to process each dataset and store the results in a list. The `combine_data_sets` function is then used to combine the processed datasets into a single list containing county and non-county data.
+
+```{r Process and Combine Data}
 # URLs of datasets
-# urls <- c(
-#   "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",
-#   "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"
-# )
+urls <- c(
+  "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv",
+  "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv"
+)
 
-# # Process data
-# data_list <- lapply(urls, process_data)
-# 
-# # Combine data
-# combined_data <- combine_data(data_list)
+# Process data
+data_list <- sapply(urls, my_wrapper)
 
+# Combine data
+combined_data <- combine_data_sets(data_list)
+```
+
+#### Plot State Data
+
+Next, we use the plot.state function to visualize the mean enrollment over time for each division in the combined non-county data.
+
+```{r Plot State Data}
 # Plot state data
 plot.state(combined_data$non_county, var_name = "enrollment")
+```
 
+#### Plot County Data
+
+We then use the plot.county function to visualize enrollment data for counties within specific states. We create plots for North Carolina (NC), South Carolina (SC), Pennsylvania (PA), and use the default settings for a general plot.
+
+```{r Plot County Data}
 # Plot county data with different parameters
 plot.county(combined_data$county, state_var = "NC", group = "top", number = 20, var_name = "enrollment")
 plot.county(combined_data$county, state_var = "SC", group = "bottom", number = 7, var_name = "enrollment")
 plot.county(combined_data$county, var_name = "enrollment")  # Default parameters
 plot.county(combined_data$county, state_var = "PA", group = "top", number = 8, var_name = "enrollment")
 
+```
+
+#### Process and Plot Additional Data
+
+We also process additional datasets, combine them, and generate plots to visualize the enrollment data for other states.
+
+```{r Process Additional Data}
 # Additional URLs for further processing
 additional_urls <- c(
   "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv",
@@ -419,6 +452,7 @@ additional_data_list <- sapply(additional_urls, my_wrapper)
 
 # Combine additional data
 combined_additional_data <- combine_data_sets(additional_data_list)
+
 # Plot additional state data
 plot.state(combined_additional_data$non_county, var_name = "enrollment")
 
