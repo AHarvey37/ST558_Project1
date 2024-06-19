@@ -1,6 +1,6 @@
 ---
 title: "ST 558 Project 1"
-author: "Andrew Harvey & Nishad Waghare"
+author: "Andrew Harvey & Nishad Waghmare"
 date: "18 June 2024"
 format: html
 editor: visual
